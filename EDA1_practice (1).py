@@ -122,14 +122,14 @@ mode_weather = data1["Weather"].mode()[0]
 print(mode_weather)
 
 
-# In[20]:
+# In[17]:
 
 
 data1["Weather"] = data1["Weather"].fillna(mode_weather)
 data1.isnull().sum()
 
 
-# In[19]:
+# In[18]:
 
 
 print(data1["Month"].value_counts())
@@ -137,14 +137,14 @@ mode_month = data1["Month"].mode()[0]
 print(mode_month)
 
 
-# In[21]:
+# In[19]:
 
 
 data1["Month"] = data1["Month"].fillna(mode_month)
 data1.isnull().sum()
 
 
-# In[22]:
+# In[20]:
 
 
 print(data1["Day"].value_counts())
@@ -152,14 +152,14 @@ mode_day = data1["Day"].mode()[0]
 print(mode_day)
 
 
-# In[23]:
+# In[21]:
 
 
 data1["Day"] = data1["Day"].fillna(mode_day)
 data1.isnull().sum()
 
 
-# In[29]:
+# In[22]:
 
 
 #detection of outliers using histogram and boxplots
@@ -179,7 +179,7 @@ plt.show()
 # #the ozone columns has extreme values beyond 81 as seen from box plot
 # #the same is confirmed from the below right-skewed histogram
 
-# In[32]:
+# In[23]:
 
 
 fig,axes = plt.subplots(2,1,figsize=(8,6),gridspec_kw={'height_ratios':[1,3]})
@@ -196,6 +196,83 @@ plt.show()
 
 # .No outliers are observed
 # .It is lightly left skewed
+
+# In[24]:
+
+
+plt.figure(figsize=(6,2))
+plt.boxplot(data1["Ozone"], vert=False)
+
+
+# In[27]:
+
+
+plt.figure(figsize=(6,2))
+boxplot_data=plt.boxplot(data1["Ozone"], vert=False)
+[item.get_xdata() for item in boxplot_data['fliers']]
+
+
+# method2(standard deviation method)
+
+# In[29]:
+
+
+data1["Ozone"].describe()
+
+
+# In[31]:
+
+
+mu = data1["Ozone"].describe()[1]
+sigma = data1["Ozone"].describe()[2]
+for x in data1['Ozone']:
+    if ((x < (mu - 3*sigma)) or (x > (mu +3*sigma))):
+        print(x)
+
+
+# #observations
+# #it is observed that only two outliers are observed using std method
+# #in boxplot method more no of outliers are identified
+# #this is because the assumption of normality is not satified in the column
+
+# #Quantile-Quantile plot for detection of outliers
+
+# In[36]:
+
+
+import scipy.stats as stats
+plt.figure(figsize=(8,6))
+stats.probplot(data1["Ozone"],dist="norm",plot=plt)
+plt.title("Q-Q Plot for outlier detection of ozone",fontsize=14)
+plt.xlabel("Theoretical Quantitles",fontsize=12)
+
+
+# #**observations from Q-Q plot**
+# #**the data does not follow normal disribution as the data points are deviating significantly away from the red line**
+# #**the data shows a right-skewed distribution and possible outliers**
+
+# In[35]:
+
+
+import scipy.stats as stats
+plt.figure(figsize=(8,6))
+stats.probplot(data1["Solar"],dist="norm",plot=plt)
+plt.title("Q-Q Plot for outlier detection of solar",fontsize=14)
+plt.xlabel("Theoretical Quantitles",fontsize=12)
+
+
+# In[43]:
+
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+plt.figure(figsize=(8, 6))
+sns.violinplot(x=data1['Ozone'], color='lightgreen')
+plt.title("Violin Plot of Ozone Levels")
+plt.xlabel("Ozone Levels")
+plt.show()
+
 
 # In[ ]:
 
