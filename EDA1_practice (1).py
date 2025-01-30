@@ -204,7 +204,7 @@ plt.figure(figsize=(6,2))
 plt.boxplot(data1["Ozone"], vert=False)
 
 
-# In[27]:
+# In[25]:
 
 
 plt.figure(figsize=(6,2))
@@ -214,13 +214,13 @@ boxplot_data=plt.boxplot(data1["Ozone"], vert=False)
 
 # method2(standard deviation method)
 
-# In[29]:
+# In[26]:
 
 
 data1["Ozone"].describe()
 
 
-# In[31]:
+# In[27]:
 
 
 mu = data1["Ozone"].describe()[1]
@@ -237,7 +237,7 @@ for x in data1['Ozone']:
 
 # #Quantile-Quantile plot for detection of outliers
 
-# In[36]:
+# In[28]:
 
 
 import scipy.stats as stats
@@ -251,7 +251,7 @@ plt.xlabel("Theoretical Quantitles",fontsize=12)
 # #**the data does not follow normal disribution as the data points are deviating significantly away from the red line**
 # #**the data shows a right-skewed distribution and possible outliers**
 
-# In[35]:
+# In[29]:
 
 
 import scipy.stats as stats
@@ -261,7 +261,7 @@ plt.title("Q-Q Plot for outlier detection of solar",fontsize=14)
 plt.xlabel("Theoretical Quantitles",fontsize=12)
 
 
-# In[43]:
+# In[30]:
 
 
 import matplotlib.pyplot as plt
@@ -272,6 +272,119 @@ sns.violinplot(x=data1['Ozone'], color='lightgreen')
 plt.title("Violin Plot of Ozone Levels")
 plt.xlabel("Ozone Levels")
 plt.show()
+
+
+# #other visualiztions
+
+# In[31]:
+
+
+sns.violinplot(data=data1["Ozone"], color='blue')
+plt.title("Violoin Plot")
+plt.show()
+
+
+# In[32]:
+
+
+sns.swarmplot(data=data1, x="Weather", y="Ozone",color="orange",palette="Set2",size=6)
+
+
+# In[33]:
+
+
+sns.stripplot(data=data1, x="Weather", y="Ozone",color="orange",palette="Set1",size=6,jitter=True)
+
+
+# In[34]:
+
+
+sns.kdeplot(data=data1["Ozone"],fill=True,color="blue")#kernel density estimation plot
+sns.rugplot(data=data1["Ozone"],color="black")
+
+
+# In[35]:
+
+
+#category wise boxplot for ozone
+sns.boxplot(data=data1,x="Weather",y="Ozone")
+
+
+# #correletaion coefficient and pair plots
+
+# In[36]:
+
+
+plt.scatter(data1["Wind"],data1["Temp"])
+
+
+# In[37]:
+
+
+#compute pearson correlation coefficient between wind sped and temp
+data1["Wind"].corr(data1["Temp"])
+
+
+# ### obsevation
+#  - the correlation b/w wind and temp is observed to be negatively correlated with mild strength
+
+# In[38]:
+
+
+#read all numeric columns into a new table
+data1_numeric=data1.iloc[:,[0,1,2,6]]
+data1_numeric
+
+
+# In[39]:
+
+
+#print correlation coefficients for all the above columns 
+data1_numeric.corr()
+
+
+# ### observations
+# - Highest correlation strength is observed b/w ozone and temp(0.597087)
+# - second highest correlation strength is observed b/w ozone and temp(-0.523738)
+# - third highest correlation strength is observed b/w wind and temp(-0.441228)
+# - the least correlation strength is observed b/w solar and wind(-0.055874)
+
+# In[41]:
+
+
+#plot a pair plot b/w all numeric columns using seaborn
+sns.pairplot(data1_numeric)
+
+
+# ### Transformation
+
+# In[45]:
+
+
+#creating dummy variable for weather column
+data2 = pd.get_dummies(data1,columns=['Month','Weather'])
+data2
+
+
+# ## Normalization of data
+
+# In[46]:
+
+
+data1_numeric.values
+
+
+# In[51]:
+
+
+#normalization of the data
+from numpy import set_printoptions
+from sklearn.preprocessing import MinMaxScaler
+array = data1_numeric.values
+scaler = MinMaxScaler(feature_range=(0,1))
+rescaledX=scaler.fit_transform(array)
+set_printoptions(precision=2)
+print(rescaledX[0:10,:])
 
 
 # In[ ]:
