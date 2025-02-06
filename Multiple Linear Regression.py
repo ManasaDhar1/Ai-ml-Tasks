@@ -49,7 +49,7 @@ cars.head()
 cars.info()
 
 
-# In[6]:
+# In[5]:
 
 
 cars.isna().sum()
@@ -60,7 +60,7 @@ cars.isna().sum()
 # - there are 81 observations (81 different cars data)
 # - the data types of the columns are also relevant and valid
 
-# In[8]:
+# In[6]:
 
 
 fig, (ax_box,ax_hist) = plt.subplots(2,sharex=True,gridspec_kw = {"height_ratios":(.15,.85)})
@@ -71,7 +71,7 @@ plt.tight_layout()
 plt.show()
 
 
-# In[9]:
+# In[7]:
 
 
 fig, (ax_box,ax_hist) = plt.subplots(2,sharex=True,gridspec_kw = {"height_ratios":(.15,.85)})
@@ -82,7 +82,7 @@ plt.tight_layout()
 plt.show()
 
 
-# In[10]:
+# In[8]:
 
 
 fig, (ax_box,ax_hist) = plt.subplots(2,sharex=True,gridspec_kw = {"height_ratios":(.15,.85)})
@@ -93,7 +93,7 @@ plt.tight_layout()
 plt.show()
 
 
-# In[11]:
+# In[9]:
 
 
 fig, (ax_box,ax_hist) = plt.subplots(2,sharex=True,gridspec_kw = {"height_ratios":(.15,.85)})
@@ -111,13 +111,13 @@ plt.show()
 # - As this is multi-dimensional data,the outliers with respect to spatial dimensions may have to be considered while building the regression model
 #   
 
-# In[13]:
+# In[10]:
 
 
 cars[cars.duplicated()]
 
 
-# In[15]:
+# In[11]:
 
 
 cars.corr()
@@ -127,6 +127,49 @@ cars.corr()
 # - Highest correlation strength is b/w wt vs vol
 # - next highest correlation strength is b/w hp vs sp
 # - the lowest correlation strength is b/w wt vs sp
+
+# In[12]:
+
+
+sns.set_style(style='darkgrid')
+sns.pairplot(cars)
+
+
+# #### Preparing a  preliminary model considering all x columns
+
+# In[15]:
+
+
+#Build model
+model1 = smf.ols('MPG~WT+SP+VOL+HP',data=cars).fit()
+
+
+# In[16]:
+
+
+model1.summary()
+
+
+# #### Observations from model summary
+# - The R-squared and adjusted R-Squared values are good and about 75% of variability in y is explained by x columns
+# - The probability values with respect to F-Statistic is close to zero,indicating that all or some of X columns are significant
+# - The p-values for VOL and WT are higher than 5% indicating some interaction issue among themselves,which need to be further explored
+
+# In[17]:
+
+
+df1 = pd.DataFrame()
+df1["actual_y1"]=cars["MPG"]
+df1.head()
+
+
+# In[19]:
+
+
+pred_y1 = model1.predict(cars.iloc[:,0:4])
+df1["pred_y1"]=pred_y1
+df1.head()
+
 
 # In[ ]:
 
