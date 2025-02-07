@@ -137,14 +137,14 @@ sns.pairplot(cars)
 
 # #### Preparing a  preliminary model considering all x columns
 
-# In[15]:
+# In[13]:
 
 
 #Build model
 model1 = smf.ols('MPG~WT+SP+VOL+HP',data=cars).fit()
 
 
-# In[16]:
+# In[14]:
 
 
 model1.summary()
@@ -155,7 +155,7 @@ model1.summary()
 # - The probability values with respect to F-Statistic is close to zero,indicating that all or some of X columns are significant
 # - The p-values for VOL and WT are higher than 5% indicating some interaction issue among themselves,which need to be further explored
 
-# In[17]:
+# In[15]:
 
 
 df1 = pd.DataFrame()
@@ -163,13 +163,104 @@ df1["actual_y1"]=cars["MPG"]
 df1.head()
 
 
-# In[19]:
+# In[16]:
 
 
 pred_y1 = model1.predict(cars.iloc[:,0:4])
 df1["pred_y1"]=pred_y1
 df1.head()
 
+
+# In[17]:
+
+
+from sklearn.metrics import mean_squared_error
+mse = mean_squared_error(df1["actual_y1"],df1["pred_y1"])
+print("MSE:",mse)
+print("RMSE:",np.sqrt(mse))
+
+
+# ## checking for multicollinearity amon x-columns using vif method
+
+# In[18]:
+
+
+# Compute VIF values
+rsq_hp = smf.ols('HP~WT+VOL+SP',data=cars).fit().rsquared
+vif_hp = 1/(1-rsq_hp)
+
+rsq_wt = smf.ols('WT~HP+VOL+SP',data=cars).fit().rsquared  
+vif_wt = 1/(1-rsq_wt) 
+
+rsq_vol = smf.ols('VOL~WT+SP+HP',data=cars).fit().rsquared  
+vif_vol = 1/(1-rsq_vol) 
+
+rsq_sp = smf.ols('SP~WT+VOL+HP',data=cars).fit().rsquared  
+vif_sp = 1/(1-rsq_sp) 
+
+# Storing vif values in a data frame
+d1 = {'Variables':['Hp','WT','VOL','SP'],'VIF':[vif_hp,vif_wt,vif_vol,vif_sp]}
+Vif_frame = pd.DataFrame(d1)  
+Vif_frame
+
+
+# ### observations for vif values:
+# - The ideal range of vif values shall be b/w 0 and 10 however slightlt higher values can be tolerated
+# - as seen from the very high vif values for vol and wt it is clear that they are prone to multicollinearity problem
+# - hence it is decided to drop one of the columns(either vol or wt) to overcome the multicollinearity
+# - it is decided to drop wt and retain vol column in further models
+
+# In[19]:
+
+
+cars1 = cars.drop("WT",axis=1)
+cars1.head()
+
+
+# In[24]:
+
+
+model2=smf.ols('MPG~HP+VOL+SP',data=cars1).fit()
+
+
+# In[25]:
+
+
+model2.summary()
+
+
+# #### Performance metrics for model2
+
+# In[26]:
+
+
+df2 = pd.DataFrame()
+df2["actual_y2"] = cars["MPG"]
+df2.head()
+
+
+# In[27]:
+
+
+pred_y2 = model2.predict(cars1.iloc[:,0:4])
+df2["pred_y2"]=pred_y2
+df2.head()
+
+
+# In[30]:
+
+
+from sklearn.metrics import mean_squared_error
+mse = mean_squared_error(df2["actual_y2"],df2["pred_y2"])
+print("MSE:",mse)
+print("RMSE:",np.sqrt(mse))
+
+
+# #### observations
+# - the adjusted r-squared value improved slightly to 0.76
+# - all the p-values for model parameters are less than 50% hence they are significant
+# - therefore the HP,VOL,SP columns are finalized as the significant predictor for the MPG response variable
+# - there is no improvement in mse value
 
 # In[ ]:
 
