@@ -217,13 +217,13 @@ cars1 = cars.drop("WT",axis=1)
 cars1.head()
 
 
-# In[24]:
+# In[20]:
 
 
 model2=smf.ols('MPG~HP+VOL+SP',data=cars1).fit()
 
 
-# In[25]:
+# In[21]:
 
 
 model2.summary()
@@ -231,7 +231,7 @@ model2.summary()
 
 # #### Performance metrics for model2
 
-# In[26]:
+# In[22]:
 
 
 df2 = pd.DataFrame()
@@ -239,7 +239,7 @@ df2["actual_y2"] = cars["MPG"]
 df2.head()
 
 
-# In[27]:
+# In[23]:
 
 
 pred_y2 = model2.predict(cars1.iloc[:,0:4])
@@ -247,7 +247,7 @@ df2["pred_y2"]=pred_y2
 df2.head()
 
 
-# In[30]:
+# In[24]:
 
 
 from sklearn.metrics import mean_squared_error
@@ -261,6 +261,127 @@ print("RMSE:",np.sqrt(mse))
 # - all the p-values for model parameters are less than 50% hence they are significant
 # - therefore the HP,VOL,SP columns are finalized as the significant predictor for the MPG response variable
 # - there is no improvement in mse value
+
+# #### Leverage (Hat Values):
+# Leverage values diagnose if a data point has an extreme value in terms of the independent variables. A point with high leverage has a great ability to influence the regression line. The threshold for considering a point as having high leverage is typically set at 3(k+1)/n, where k is the number of predictors and n is the sample size.
+
+# In[26]:
+
+
+#Define variables and assign values
+k=3
+n=81
+levarage_cutoff = 3*((k+1)/n)
+levarage_cutoff
+
+
+# In[27]:
+
+
+cars1.shape
+
+
+# In[29]:
+
+
+from statsmodels.graphics.regressionplots import influence_plot
+influence_plot(model1,alpha=.05)
+y=[i for i in range(-2,8)]
+x=[levarage_cutoff for i in range(10)]
+plt.plot(x,y,'r+')
+plt.show()
+
+
+# #### Observations
+# - from the above plot,it is evident that datapoints 65,70,76,78,79,80 are the influencers
+# - as their H Levrage values are higher and size is higher
+#    
+
+# In[30]:
+
+
+cars2=cars1.drop(cars1.index[[65,70,76,78,79,80]],axis=0).reset_index(drop=True)
+
+
+# In[31]:
+
+
+cars2
+
+
+# ### Build model3 on cars2 dataset
+# 
+
+# In[32]:
+
+
+model3=smf.ols('MPG~VOL+SP+HP',data=cars2).fit()
+
+
+# In[33]:
+
+
+model3.summary()
+
+
+# In[34]:
+
+
+df3=pd.DataFrame()
+df3["actual_y3"]=cars2["MPG"]
+df3.head()
+
+
+# In[41]:
+
+
+pred_y3 = model3.predict(cars2.iloc[:,0:3])
+df3["pred_y3"]=pred_y3
+df3.head()
+
+
+# In[42]:
+
+
+from sklearn.metrics import mean_squared_error
+mse = mean_squared_error(df3["actual_y3"],df3["pred_y3"])
+print("MSE:",mse)
+print("RMSE:",np.sqrt(mse))
+
+
+# #### Comparison of models
+#                      
+# 
+# | Metric         | Model 1 | Model 2 | Model 3 |
+# |----------------|---------|---------|---------|
+# | R-squared      | 0.771   | 0.770   | 0.885   |
+# | Adj. R-squared | 0.758   | 0.761   | 0.880   |
+# | MSE            | 18.89   | 18.91   | 8.68    |
+# | RMSE           | 4.34    | 4.34    | 2.94    |
+# 
+# 
+# - **From the above comparison table it is observed that model3 is the best among all with superior performance metrics**
+
+# In[45]:
+
+
+df3["residuals"]=df3["actual_y3"]-df3["pred_y3"]
+df3
+
+
+# In[47]:
+
+
+plt.scatter(df3["pred_y3"],df3["residuals"])
+
+
+# In[48]:
+
+
+import statsmodels.api as sm
+sm.qqplot(df3["residuals"],line='45',fit=True)
+plt.show
+
 
 # In[ ]:
 
